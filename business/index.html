@@ -46,12 +46,11 @@ header p{font-size:15.5px;line-height:1.5;opacity:.92;max-width:520px;margin:0 a
 input[type=text],textarea{width:100%;font:inherit;font-size:16px;padding:13px 14px;border:2px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);outline:none;transition:border-color .15s,background .15s}
 textarea{min-height:96px;resize:vertical}
 input[type=text]:focus,textarea:focus{border-color:var(--court);background:#fff}
-.opts{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}
-.opts.col{flex-direction:column}
-.opt{position:relative}
+.opts{display:grid;grid-template-columns:1fr;gap:9px;margin-top:8px}
+.opts.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{position:relative;display:block;min-width:0}
 .opt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0;z-index:1}
-.opt span{display:flex;align-items:center;gap:10px;padding:11px 15px;border:2px solid var(--line);background:var(--bg);border-radius:12px;font-size:15.5px;line-height:1.3;transition:all .15s}
-.opts.col .opt span{width:100%}
+.opt span{display:flex;align-items:center;gap:10px;height:100%;padding:11px 15px;border:2px solid var(--line);background:var(--bg);border-radius:12px;font-size:15.5px;line-height:1.3;transition:all .15s}
 .opt span:before{content:"";flex:0 0 18px;height:18px;border:2px solid #9fb0dc;background:#fff;border-radius:50%;transition:all .15s}
 .opt.m span:before{border-radius:5px}
 .opt:hover span{border-color:var(--court)}
@@ -59,7 +58,7 @@ input[type=text]:focus,textarea:focus{border-color:var(--court);background:#fff}
 .opt input:checked + span:before{border-color:var(--court);background:var(--court);box-shadow:inset 0 0 0 3px #fff}
 .opt.m input:checked + span:before{background:var(--court) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.4 2.4 4.6-5' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat;box-shadow:none}
 .opt input:focus-visible + span{outline:3px solid rgba(23,71,201,.35)}
-.scale{display:flex;gap:9px;margin-top:8px}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:8px}
 .scale .opt{flex:1}
 .scale .opt span{justify-content:center;padding:13px 0;font-weight:700}
 .scale .opt span:before{display:none}
@@ -96,8 +95,9 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:12.5px;margin-top:
   .body{padding:20px 14px 0}
   .steptitle{font-size:20px;margin-bottom:14px}
   .q{margin-bottom:20px}
-  .opts{flex-direction:column;gap:8px}
-  .opt span{min-height:50px;padding:12px 14px;width:100%}
+  .opts{gap:8px}
+  .opt span{min-height:50px;padding:12px 14px}
+  .opts.grid2 .opt span{padding:12px 10px;gap:8px;font-size:15px}
   input[type=text],textarea{padding:14px}
   .scale{gap:6px}.scale .opt span{min-height:52px;padding:0}
   .nav{position:sticky;bottom:0;margin:0 -14px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(255,255,255,0),#fff 28%);}
@@ -252,7 +252,7 @@ function qHTML(q){
   } else if(q.type==='single' || q.type==='multi'){
     const multi = q.type==='multi';
     const sel = multi ? (a||[]) : [a];
-    h += `<div class="opts ${q.cols?'':'col'}">` + orderedOptions(q).map((o,i)=>{
+    h += `<div class="opts ${q.cols?'grid2':''}">` + orderedOptions(q).map((o,i)=>{
       const label = typeof o==='string'?o:o.label;
       const checked = sel.includes(label) ? 'checked':'' ;
       return `<label class="opt ${multi?'m':''}"><input type="${multi?'checkbox':'radio'}" name="${q.id}" value="${esc(label)}" ${checked}><span>${esc(label)}</span></label>`;
