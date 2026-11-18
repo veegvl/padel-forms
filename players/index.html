@@ -206,14 +206,20 @@ const state = { answers:{}, idx:0 };
 
 const shuffled = {};
 function orderedOptions(q){
-  if(!q.shuffle) return q.options;
-  if(!shuffled[q.id]){
-    const fixed = (q.fixed||[]);
-    const head = q.options.filter(o=>!fixed.includes(o));
-    for(let i=head.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[head[i],head[j]]=[head[j],head[i]];}
-    shuffled[q.id] = head.concat(q.options.filter(o=>fixed.includes(o)));
+  let opts;
+  if(!q.shuffle){ opts = q.options.slice(); }
+  else {
+    if(!shuffled[q.id]){
+      const fixed = (q.fixed||[]);
+      const head = q.options.filter(o=>!fixed.includes(o));
+      for(let i=head.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[head[i],head[j]]=[head[j],head[i]];}
+      shuffled[q.id] = head.concat(q.options.filter(o=>fixed.includes(o)));
+    }
+    opts = shuffled[q.id].slice();
   }
-  return shuffled[q.id];
+  // «Другое» всегда последним, чтобы поле для уточнения появлялось прямо под ним
+  if(q.other && opts.includes(q.other)) opts = opts.filter(o=>o!==q.other).concat(q.other);
+  return opts;
 }
 function steps(){ return CFG.steps.filter(s => !s.showIf || s.showIf(state.answers)); }
 
@@ -290,9 +296,10 @@ function render(){
   if(state.idx >= list.length) state.idx = list.length-1;
   const st = list[state.idx];
   const last = state.idx === list.length-1;
-  bar.style.width = ((state.idx)/list.length*100 + 6) + '%';
+  const branchPending = CFG.branchKey && !state.answers[CFG.branchKey];
+  bar.style.width = (branchPending ? 6 : (state.idx)/list.length*100 + 6) + '%';
   root.innerHTML =
-    `<div class="stepmeta">Шаг ${state.idx+1} из ${list.length}</div>
+    `<div class="stepmeta">${branchPending ? 'Шаг 1' : `Шаг ${state.idx+1} из ${list.length}`}</div>
      <div class="steptitle">${esc(st.title)}</div>
      <form id="f" novalidate>${st.questions.map(qHTML).join('')}
        <div class="nav">${state.idx>0?'<button type="button" class="btn-back" id="back">←</button>':''}
