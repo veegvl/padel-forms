@@ -27,12 +27,15 @@ body:before{
     linear-gradient(160deg,var(--court) 0%,var(--court-dark) 70%,var(--court-deep) 100%);
 }
 .wrap{max-width:640px;margin:0 auto}
-header{color:var(--white);text-align:center;padding:18px 6px 20px}
-.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+header{color:var(--white);text-align:center;padding:14px 4px 20px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .ball{width:14px;height:14px;border-radius:50%;background:var(--ball);position:relative;display:inline-block;box-shadow:inset -2px -2px 0 rgba(0,0,0,.12)}
 .ball:after{content:"";position:absolute;inset:2px -3px;border:1.5px solid rgba(255,255,255,.95);border-radius:50%;clip-path:inset(0 60% 0 0)}
-h1{font-size:clamp(24px,5.5vw,34px);line-height:1.15;margin:14px 0 8px;font-weight:800}
-header p{font-size:15.5px;line-height:1.5;opacity:.92;max-width:520px;margin:0 auto}
+h1{font-size:clamp(24px,7vw,34px);line-height:1.12;margin:14px auto 10px;font-weight:800;letter-spacing:-.01em;max-width:520px;text-wrap:balance}
+header p{font-size:15.5px;line-height:1.45;opacity:.9;max-width:460px;margin:0 auto;text-wrap:balance}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:16px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);font-size:13.5px;font-weight:600;line-height:1.2;white-space:nowrap}
+.chip.hot{background:var(--ball);border-color:var(--ball);color:var(--court-deep);font-weight:800}
 .card{background:var(--white);border-radius:22px;box-shadow:0 18px 50px rgba(3,14,60,.45);overflow:hidden}
 .progress{height:8px;background:var(--line)}
 .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ball-dark),var(--ball));transition:width .35s ease;border-radius:0 8px 8px 0}
@@ -89,8 +92,10 @@ button[disabled]{opacity:.6;cursor:wait}
 .err-submit{color:var(--err);font-weight:600;font-size:14px;margin-top:10px;display:none}
 footer{text-align:center;color:rgba(255,255,255,.7);font-size:12.5px;margin-top:18px}
 @media(max-width:600px){
-  header{padding:10px 4px 16px}
+  header{padding:6px 2px 16px}
   header p{font-size:14.5px}
+  .chips{margin-top:14px;gap:7px}
+  .chip{font-size:13px;padding:9px 12px}
   .card{border-radius:18px}
   .body{padding:20px 14px 0}
   .steptitle{font-size:20px;margin-bottom:14px}
@@ -114,6 +119,7 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:12.5px;margin-top:
     <div class="badge"><i class="ball"></i> Padel School</div>
     <h1 id="h-title"></h1>
     <p id="h-intro"></p>
+    <div class="chips" id="chips"></div>
   </header>
   <div class="card">
     <div class="progress"><i id="bar"></i></div>
@@ -136,7 +142,9 @@ const SETTINGS = {
 const CFG = {
   id: "players",
   title: "Анкета игрока в падл",
-  intro: "Поможет понять, кто играет в падл и на каком вы уровне. Займёт 2–3 минуты. В конце вас ждёт бонус: короткий гайд по развитию игры от новичка до продвинутого уровня.",
+  heading: "Анкета игрока в падл",
+  intro: "Поможет понять ваш уровень и то, с чем вы сталкиваетесь на корте.",
+  chips: [{text:"⏱ 2–3 минуты"},{text:"🎁 Бонус: гайд по развитию игры",bonus:true}],
   steps: [
     { title: "О вас", questions: [
       { id:"city", type:"text", label:"Ваш город", placeholder:"Например, Москва", required:true },
@@ -188,12 +196,13 @@ const CFG = {
 /* ==================== ДВИЖОК ==================== */
 const $ = s => document.querySelector(s);
 const root = $('#root'), bar = $('#bar');
-$('#h-title').textContent = CFG.title;
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+$('#h-title').textContent = CFG.heading || CFG.title;
+$('#chips').innerHTML = (CFG.chips||[]).map((c,i)=>`<span class="chip${c.bonus?' hot':''}">${esc(c.text)}</span>`).join('');
 $('#h-intro').textContent = CFG.intro;
 document.title = CFG.title;
 
 const state = { answers:{}, idx:0 };
-const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const shuffled = {};
 function orderedOptions(q){
